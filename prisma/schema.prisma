@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  username   String    @unique
+  bio        String?
+  image      String?
+  articles   Article[] @relation("UserArticles")
+  favorites  Article[] @relation("FavoriteArticles")
+  followedBy User[]    @relation("UserFollows", references: [id])
+  following  User[]    @relation("UserFollows", references: [id])
+  comments   Comment[]
+}
+
+model Article {
+  id          Int              @id @default(autoincrement())
+  title       String
+  description String
+  body        String
+  slug        String
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now())
+  tags        ArticlesOnTags[]
+  author      User             @relation("UserArticles", fields: [authorId], references: [id])
+  authorId    Int
+  favoritedBy User[]           @relation("FavoriteArticles")
+  comments    Comment[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  article   Article  @relation(fields: [articleId], references: [id])
+  articleId Int
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  Int
+}
+
+model Tag {
+  id       Int              @id @default(autoincrement())
+  name     String           @unique
+  articles ArticlesOnTags[]
+}
+
+model ArticlesOnTags {
+  article   Article @relation(fields: [articleId], references: [id])
+  articleId Int
+  tag       Tag     @relation(fields: [tagId], references: [id])
+  tagId     Int
+
+  @@id([articleId, tagId])
+}

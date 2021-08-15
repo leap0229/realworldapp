@@ -26,13 +26,9 @@ export class ProfilesService {
     reqUser: User,
     username: string,
   ): Promise<ProfileResponseObject> {
-    const followedUser = await this.prisma.user.findUnique({
-      where: { username },
-    });
-
     const user = await this.prisma.user.update({
       where: { id: reqUser.id },
-      data: { following: { connect: { id: followedUser.id } } },
+      data: { following: { connect: { username } } },
     });
 
     const { id, email, password, ...profile } = user;
@@ -40,13 +36,9 @@ export class ProfilesService {
   }
 
   async unFollowUser(user: User, username: string): Promise<any> {
-    const followedUser = await this.prisma.user.findUnique({
-      where: { username },
-    });
-
     await this.prisma.user.update({
       where: { id: user.id },
-      data: { following: { disconnect: { id: followedUser.id } } },
+      data: { following: { disconnect: { username } } },
     });
 
     const { id, email, password, ...profile } = user;

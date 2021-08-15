@@ -1,4 +1,12 @@
-import { Controller, Delete, Get, Param, Post, Request } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  Request,
+} from '@nestjs/common';
 import { ProfilesService } from './profiles.service';
 
 @Controller('profiles')
@@ -11,6 +19,7 @@ export class ProfilesController {
   }
 
   @Post(':username/follow')
+  @HttpCode(200)
   followUser(@Request() req, @Param('username') username: string) {
     return this.profilesService.followUser(req.user, username);
   }

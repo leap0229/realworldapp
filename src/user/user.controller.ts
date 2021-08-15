@@ -1,34 +1,50 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Request,
+  UseGuards,
+  Get,
+  Put,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { UserResponseObject } from './dto/user.dto';
+import { LocalAuthGuard } from 'src/auth/local-auth.guard';
+import { Public } from 'src/auth/public.decorator';
+import { UserResponseObject } from './dto/users.dto';
 import { UserService } from './user.service';
 
 @Controller()
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private userService: UserService) {}
 
+  @Public()
+  @UseGuards(LocalAuthGuard)
+  @Post('/users/login')
+  async signin(@Request() req): Promise<UserResponseObject> {
+    return this.userService.signin(req.user);
+  }
+
+  @Public()
   @Post('users')
   signup(
     @Body('user') userCreateInput: Prisma.UserCreateInput,
   ): Promise<UserResponseObject> {
-    return this.userService.create(userCreateInput);
+    return this.userService.signup(userCreateInput);
   }
 
-  /*@Get()
-  findAll() {
-    return this.userService.findAll();
+  @Get('user')
+  getCurrentUser(@Request() req): Promise<UserResponseObject> {
+    return this.userService.getCurrentUser(req.user);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  @Put('user')
+  update(
+    @Request() req,
+    @Body('user') userUpdateInput: Prisma.UserUpdateInput,
+  ): Promise<UserResponseObject> {
+    return this.userService.update(req.user, userUpdateInput);
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
-
+  /*
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);

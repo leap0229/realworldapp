@@ -3,6 +3,7 @@ import {
   Delete,
   Get,
   HttpCode,
+  HttpStatus,
   Param,
   Post,
   Request,
@@ -19,7 +20,7 @@ export class ProfilesController {
   }
 
   @Post(':username/follow')
-  @HttpCode(200)
+  @HttpCode(HttpStatus.OK)
   followUser(@Request() req, @Param('username') username: string) {
     return this.profilesService.followUser(req.user, username);
   }

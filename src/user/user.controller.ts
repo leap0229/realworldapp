@@ -6,13 +6,20 @@ import {
   UseGuards,
   Get,
   Put,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { plainToClass } from 'class-transformer';
 import { LocalAuthGuard } from 'src/auth/local-auth.guard';
 import { Public } from 'src/auth/public.decorator';
-import { UserResponseObject } from './dto/users.dto';
+import {
+  CreateUserRequestDto,
+  UpdateUserRequestDto,
+  UserResponse,
+} from './dto/users.dto';
 import { UserService } from './user.service';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller()
 export class UserController {
   constructor(private userService: UserService) {}
@@ -20,33 +27,40 @@ export class UserController {
   @Public()
   @UseGuards(LocalAuthGuard)
   @Post('/users/login')
-  async signin(@Request() req): Promise<UserResponseObject> {
-    return this.userService.signin(req.user);
+  async signin(@Request() req): Promise<UserResponse> {
+    const user = await this.userService.signin(req.user);
+    return plainToClass(UserResponse, {
+      user,
+    });
   }
 
   @Public()
   @Post('users')
-  signup(
-    @Body('user') userCreateInput: Prisma.UserCreateInput,
-  ): Promise<UserResponseObject> {
-    return this.userService.signup(userCreateInput);
+  async signup(
+    @Body('user') createUserRequestDto: CreateUserRequestDto,
+  ): Promise<UserResponse> {
+    const user = await this.userService.signup(createUserRequestDto);
+    return plainToClass(UserResponse, {
+      user,
+    });
   }
 
   @Get('user')
-  getCurrentUser(@Request() req): Promise<UserResponseObject> {
-    return this.userService.getCurrentUser(req.user);
+  async getCurrentUser(@Request() req): Promise<UserResponse> {
+    const user = await this.userService.getCurrentUser(req.user);
+    return plainToClass(UserResponse, {
+      user,
+    });
   }
 
   @Put('user')
-  update(
+  async update(
     @Request() req,
-    @Body('user') userUpdateInput: Prisma.UserUpdateInput,
-  ): Promise<UserResponseObject> {
-    return this.userService.update(req.user, userUpdateInput);
+    @Body('user') updateUserRequestDto: UpdateUserRequestDto,
+  ): Promise<UserResponse> {
+    const user = await this.userService.update(req.user, updateUserRequestDto);
+    return plainToClass(UserResponse, {
+      user,
+    });
   }
-  /*
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }*/
 }

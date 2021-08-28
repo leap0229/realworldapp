@@ -5,9 +5,16 @@ import { UserModule } from './user/user.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/jwt-auth.guard';
 import { ProfilesModule } from './profiles/profiles.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UserModule, ProfilesModule],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: `.env.stage.${process.env.STAGE}`,
+    }),
+    UserModule,
+    ProfilesModule,
+  ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: JwtAuthGuard }],
 })

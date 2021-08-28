@@ -63,17 +63,9 @@ export class UserResponseDto implements UserPersonalDataType {
 
   @Exclude()
   password?: string;
-
-  constructor(partial: Partial<UserResponseDto>) {
-    Object.assign(this, partial);
-  }
 }
 
 export class UserResponse {
   @Type(() => UserResponseDto)
   user: UserResponseDto;
-
-  constructor(partial: Partial<UserResponse>) {
-    Object.assign(this, partial);
-  }
 }
